@@ -1,0 +1,106 @@
+# VidyutDrishti Configuration
+# Production-ready configuration for Karnataka SLDC renewable energy forecasting
+
+[system]
+name = "VidyutDrishti"
+version = "1.0.0"
+environment = "production"  # development, staging, production
+
+[data]
+# Data source configuration
+nasa_power_api_url = "https://power.larc.nasa.gov/api/temporal/daily/point"
+era5_api_url = "https://cds.climate.copernicus.eu/api/v2"
+
+# Karnataka region bounds
+karnataka_bounds = {
+    "north": 18.5,
+    "south": 11.5,
+    "east": 78.5,
+    "west": 74.0
+}
+
+# Data quality thresholds
+max_missing_pct = 5.0
+min_data_points_per_plant = 1000
+
+[models]
+# Model configuration
+default_model = "ensemble"
+quantiles = [0.1, 0.5, 0.9]
+
+# LightGBM parameters
+lightgbm = {
+    "n_estimators": 1000,
+    "learning_rate": 0.05,
+    "max_depth": 8,
+    "num_leaves": 50,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8
+}
+
+# LSTM parameters
+lstm = {
+    "sequence_length": 24,
+    "lstm_units": [64, 32],
+    "dropout_rate": 0.2,
+    "batch_size": 32,
+    "epochs": 100
+}
+
+[api]
+# API configuration
+host = "0.0.0.0"
+port = 8000
+workers = 4
+timeout = 300
+
+# CORS settings
+cors_origins = ["*"]  # Configure for production
+
+[logging]
+# Logging configuration
+level = "INFO"
+format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+file = "logs/vidyutdrishti.log"
+
+[monitoring]
+# Monitoring and alerting
+enable_health_checks = true
+health_check_interval = 30  # seconds
+
+# Performance thresholds
+max_response_time = 5.0  # seconds
+min_accuracy_threshold = 0.8
+
+[deployment]
+# Deployment configuration
+docker_image = "vidyutdrishti:latest"
+kubernetes_namespace = "renewable-energy"
+
+# Scaling
+min_replicas = 2
+max_replicas = 10
+target_cpu_utilization = 70
+
+[features]
+# Feature engineering configuration
+lag_features = [1, 2, 3, 6, 12, 24, 48, 168]
+rolling_windows = [3, 6, 12, 24, 168]
+enable_seasonal_features = true
+enable_weather_interactions = true
+
+[evaluation]
+# Evaluation configuration
+test_size = 0.2
+validation_size = 0.2
+cv_folds = 5
+
+# Metrics to compute
+metrics = ["mae", "rmse", "mape", "smape", "picp", "pinball"]
+
+[external]
+# External service configuration
+# Add API keys, database connections, etc.
+# nasa_power_api_key = "your_key_here"
+# era5_api_key = "your_key_here"
+# database_url = "postgresql://user:pass@host:port/db"

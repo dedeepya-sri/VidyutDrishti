@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  vidyutdrishti-api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONPATH=/app
+    volumes:
+      - ../models:/app/models:ro
+      - ../data:/app/data:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  vidyutdrishti-dashboard:
+    build:
+      context: ..
+      dockerfile: frontend/docker/Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      vidyutdrishti-api:
+        condition: service_healthy
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+    restart: unless-stopped
+
+  # Optional: Add a data pipeline service
+  # vidyutdrishti-pipeline:
+  #   build:
+  #     context: ..
+  #     dockerfile: docker/Dockerfile.pipeline
+  #   volumes:
+  #     - ../data:/app/data
+  #   environment:
+  #     - PYTHONPATH=/app
+  #   command: python data_pipeline/preprocessing/feature_engineering.py
